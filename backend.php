@@ -19,7 +19,6 @@ if (!$token) {
 }
 
 try {
-    // 1. Verify ID token
     $factory = (new Factory)
         ->withServiceAccount($serviceAccountPath)
         ->withProjectId($projectId);
@@ -32,25 +31,61 @@ try {
 
     $_SESSION['token'] = $token;
 
-    // 2. Save to Firestore via REST
-    $data = [
-        'fields' => [
-            'email' => ['stringValue' => $email],
-            'earned' => ['integerValue' => 0],
-            'createdAt' => ['timestampValue' => date('c')]
-        ]
-    ];
+    // Firestore REST
+    $url = "https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/users/$uid";
 
-    $ch = curl_init("https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents/users/$uid?mask.fieldPaths=email");
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PATCH');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    // Hämta användaren
+    $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
-        'Authorization: Bearer ' . $token,
+        'Authorization: Bearer '.$token,
         'Content-Type: application/json'
     ]);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     $result = curl_exec($ch);
     curl_close($ch);
+
+    $userData = json_decode($result, true);
+
+    if (!isset($userData['fields'])) {
+        // Skapa ny user
+        $newUser = [
+            'fields' => [
+                'email' => ['stringValue' => $email],
+                'earned' => ['integerValue' => 0],
+                'createdAt' => ['timestampValue' => date('c')]
+            ]
+        ];
+
+        $ch2 = curl_init($url);
+        curl_setopt($ch2, CURLOPT_CUSTOMREQUEST, 'PATCH');
+        curl_setopt($ch2, CURLOPT_POSTFIELDS, json_encode($newUser));
+        curl_setopt($ch2, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer '.$token,
+            'Content-Type: application/json'
+        ]);
+        curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
+        curl_exec($ch2);
+        curl_close($ch2);
+    } else {
+        // Uppdatera enbart email om user finns
+        $updateData = [
+            'fields' => [
+                'email' => ['stringValue' => $email]
+            ]
+        ];
+
+        $updateUrl = $url . "?updateMask.fieldPaths=email";
+        $ch3 = curl_init($updateUrl);
+        curl_setopt($ch3, CURLOPT_CUSTOMREQUEST, 'PATCH');
+        curl_setopt($ch3, CURLOPT_POSTFIELDS, json_encode($updateData));
+        curl_setopt($ch3, CURLOPT_HTTPHEADER, [
+            'Authorization: Bearer '.$token,
+            'Content-Type: application/json'
+        ]);
+        curl_setopt($ch3, CURLOPT_RETURNTRANSFER, true);
+        curl_exec($ch3);
+        curl_close($ch3);
+    }
 
     echo json_encode([
         'status' => 'ok',
@@ -58,7 +93,7 @@ try {
         'email' => $email
     ]);
 
-} catch (\Throwable $e) {
+} catch (Throwable $e) {
     http_response_code(401);
     echo json_encode([
         'error' => 'Token verification failed',
