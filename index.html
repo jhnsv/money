@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Login test</title>
+</head>
+<body>
+
+<button id="loginBtn">Logga in med Google</button>
+<pre id="output"></pre>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-auth.js";
+
+  const firebaseConfig = {
+  apiKey: "AIzaSyAgbyOldMPNqG9jB7Zx3r1-7h-nrMRIXuk",
+  authDomain: "money-f26a3.firebaseapp.com",
+  projectId: "money-f26a3",
+  storageBucket: "money-f26a3.firebasestorage.app",
+  messagingSenderId: "734510055287",
+  appId: "1:734510055287:web:f1a2048dc609c886bfeb72"
+};
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+  const output = document.getElementById("output");
+
+  document.getElementById("loginBtn").addEventListener("click", async () => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const token = await user.getIdToken();
+
+      output.textContent = `Inloggad som: ${user.email}\nSkickar token till server...`;
+
+      const res = await fetch("backend.php", {
+        method: "POST",
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+
+      const resText = await res.text();
+      console.log("RAW:", resText);
+
+      try {
+        const data = JSON.parse(resText);
+        output.textContent = JSON.stringify(data, null, 2);
+      } catch (error) {
+        output.textContent = "RAW response (JSON failed):\n" + resText;
+      }
+
+    } catch (err) {
+      console.error(err);
+      output.textContent = "Något gick fel: " + err;
+    }
+  });
+</script>
+</body>
+</html>

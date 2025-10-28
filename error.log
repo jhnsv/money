@@ -1,0 +1,8 @@
+[27-Oct-2025 19:27:37 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method Kreait\Firebase\JWT\SecureToken::sub() in /Users/john/Local Sites/wordpress-test/app/public/money/backend.php:33
+Stack trace:
+#0 {main}
+  thrown in /Users/john/Local Sites/wordpress-test/app/public/money/backend.php on line 33
+[27-Oct-2025 19:29:59 UTC] PHP Fatal error:  Uncaught Error: Call to undefined method Kreait\Firebase\JWT\SecureToken::claims() in /Users/john/Local Sites/wordpress-test/app/public/money/backend.php:34
+Stack trace:
+#0 {main}
+  thrown in /Users/john/Local Sites/wordpress-test/app/public/money/backend.php on line 34

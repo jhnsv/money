@@ -1,0 +1,10 @@
+{
+    "require": {
+        "google/cloud-firestore": "^0.1.0",
+        "kreait/firebase-tokens": "^5.3",
+        "google/auth": "^1.48",
+        "kreait/firebase-php": "^7.16",
+        "google/gax": "^0.25.0",
+        "google/cloud-core": "^1.53"
+    }
+}
