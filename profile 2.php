@@ -80,20 +80,7 @@ html, body {
 
 <!-- Modal direkt efter <body> -->
 <div id="adModal">
-<div id="adBox" style="width:100%;max-width:500px;">
-    <!-- AdSense Annons -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2023208077809078"
-        crossorigin="anonymous"></script>
-    <ins class="adsbygoogle"
-        style="display:block"
-        data-ad-client="ca-pub-2023208077809078"
-        data-ad-slot="9888606100"
-        data-ad-format="auto"
-        data-full-width-responsive="true"></ins>
-    <script>
-        (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
-</div>
+  <video id="adVideo" controls muted playsinline></video>
 </div>
 
 <h1>Din profil</h1>
@@ -115,16 +102,25 @@ const video = document.getElementById('adVideo');
 earnBtn.addEventListener('click', showAd);
 
 function showAd() {
-  console.log("Riktig annons visas");
+  console.log("Knappen klickad");
 
   modal.style.display = "flex";
+  console.log("Modal visas");
 
-  // Visa annons i 7 sek = earn
-  setTimeout(() => {
-    console.log("Annons visad klart → earn");
+video.src = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4";
+
+
+  video.play().then(() => {
+    console.log("Videon startade");
+  }).catch(err => {
+    console.log("Video play error:", err);
+  });
+
+  video.onended = () => {
+    console.log("Video slut → +1 poäng");
     modal.style.display = "none";
     earnPoint();
-  }, 7000);
+  };
 }
 
 async function earnPoint() {
